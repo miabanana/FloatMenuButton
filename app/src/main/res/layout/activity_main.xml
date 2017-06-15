@@ -8,6 +8,7 @@
     android:background="@android:color/black">
 
     <com.huaying.floatmenu.FloatMenu
+        android:id="@+id/floatMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
@@ -16,6 +17,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="16dp">
         <Button
+            android:id="@+id/menu"
             android:layout_width="30dp"
             android:layout_height="wrap_content"
             android:background="@android:drawable/ic_dialog_info"

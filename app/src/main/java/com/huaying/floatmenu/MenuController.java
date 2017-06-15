@@ -1,6 +1,14 @@
 package com.huaying.floatmenu;
 
+import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.TranslateAnimation;
+import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,14 +19,17 @@ import java.util.Map;
  * Created by huaying on 08/06/2017.
  */
 
-public class MenuController {
-    public static final int STATE_CLOSED = 1;
-    public static final int STATE_OPENED = 2;
-    public static final int STATE_CLOSING = 3;
-    public static final int STATE_OPENING = 4;
-    private static final int ANIMATION_DURATION = 100;
+class MenuController {
+    private static final int STATE_CLOSED = 1;
+    private static final int STATE_OPENED = 2;
+    private static final int STATE_CLOSING = 3;
+    private static final int STATE_OPENING = 4;
 
-    public interface ControllerListener {
+    private static final int ANIM_DURATION = 300;
+    private static final float ANIM_ALPHA_0 = 0.0f;
+    private static final float ANIM_ALPHA_100 = 1.0f;
+
+    interface ControllerListener {
         void onItemClick(View menuButton);
         void onStartOpening();
         void onOpened();
@@ -26,48 +37,17 @@ public class MenuController {
         void onClosed();
     }
 
-    private List<View> mButtons = new ArrayList<>();
-    private Map<View, ButtonPoint> mButtonPositions = new HashMap<>();
-    private int mState;
     private final ControllerListener mListener;
+    private List<View> mButtons = new ArrayList<>();
+    private int mState;
+    private View mClickedButton;
 
-//-----
-    private List<View> mMenuBtnList;
-    private View mFirstMenuBtn;
-
-//    public FloatMenu(View firstMenuBtn, View... otherMenuBtns) {
-//        mFirstMenuBtn = firstMenuBtn;
-//        Collections.addAll(mMenuBtnList, otherMenuBtns);
-//    }
-
-    public void openMenu() {
-
-    }
-
-    public void closeMenu(View selectedBtn) {
-        if (mFirstMenuBtn != selectedBtn) {
-            mMenuBtnList.add(mFirstMenuBtn);
-            mMenuBtnList.remove(selectedBtn);
-            mFirstMenuBtn = selectedBtn;
-        }
-    }
-
-    public View getFirstMenuBtn() {
-        return mFirstMenuBtn;
-    }
-
-    public List<View> getMenuBtnList() {
-        return mMenuBtnList;
-    }
-//----
-
-
-    public MenuController(ControllerListener listener) {
+    MenuController(ControllerListener listener) {
         this.mListener = listener;
         this.mState = STATE_CLOSED;
     }
 
-    public void toggle() {
+    void toggle() {
         if (isOpened()) {
             close();
         } else {
@@ -79,44 +59,100 @@ public class MenuController {
         if (isOpened()) return;
 
         setState(STATE_OPENING);
-        
-        setState(STATE_OPENED);
+        setOpenAnimation();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setState(STATE_OPENED);
+            }
+        }, ANIM_DURATION);
     }
 
     private void close() {
         if (!isOpened()) return;
 
         setState(STATE_CLOSING);
-
-        setState(STATE_CLOSED);
+        setCloseAnimation();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setState(STATE_CLOSED);
+            }
+        }, ANIM_DURATION);
     }
 
-    public boolean isOpened() {
+    boolean isOpened() {
         return mState == STATE_OPENED;
     }
 
-    public void setState(int state) {
+    private void setOpenAnimation() {
+        float fromY = 1.0f;
+        for (int i=1; i<getButtonsNumber(); i++) {
+            View button = mButtons.get(i);
+            if (button.getVisibility() != View.GONE) {
+                AnimationSet openAnim = new AnimationSet(true);
+                openAnim.setInterpolator(new AccelerateDecelerateInterpolator());
+                openAnim.setDuration(ANIM_DURATION);
+                Animation translate = new TranslateAnimation(
+                        Animation.RELATIVE_TO_SELF, 0,
+                        Animation.RELATIVE_TO_SELF, 0,
+                        Animation.RELATIVE_TO_SELF, fromY,
+                        Animation.RELATIVE_TO_SELF, 0);
+                Animation alpha = new AlphaAnimation(ANIM_ALPHA_0, ANIM_ALPHA_100);
+                openAnim.addAnimation(translate);
+                openAnim.addAnimation(alpha);
+                button.startAnimation(openAnim);
+                fromY++;
+            }
+        }
+
+    }
+
+    private void setCloseAnimation() {
+        float toY = 1.0f;
+        for (int i=1; i<getButtonsNumber(); i++) {
+            View button = mButtons.get(i);
+            if (button.getVisibility() != View.GONE) {
+                AnimationSet openAnim = new AnimationSet(true);
+                openAnim.setInterpolator(new AccelerateDecelerateInterpolator());
+                openAnim.setDuration(ANIM_DURATION);
+                Animation translate = new TranslateAnimation(
+                        Animation.RELATIVE_TO_SELF, 0,
+                        Animation.RELATIVE_TO_SELF, 0,
+                        Animation.RELATIVE_TO_SELF, 0,
+                        Animation.RELATIVE_TO_SELF, toY);
+                Animation alpha = new AlphaAnimation(ANIM_ALPHA_100, ANIM_ALPHA_0);
+                openAnim.addAnimation(translate);
+                openAnim.addAnimation(alpha);
+                button.startAnimation(openAnim);
+                toY++;
+            }
+        }
+    }
+
+    private void setState(int state) {
         this.mState = state;
         switch (state) {
             case STATE_CLOSED:
-                setButtonsVisibility(View.INVISIBLE);
+                setButtonsEnable(true);
+                setButtonsVisibility(View.GONE);
                 break;
             case STATE_CLOSING:
                 setButtonsEnable(false);
                 mListener.onStartClosing();
                 break;
             case STATE_OPENED:
-                setButtonsVisibility(View.VISIBLE);
                 setButtonsEnable(true);
                 break;
             case STATE_OPENING:
                 setButtonsEnable(false);
+                setButtonsVisibility(View.VISIBLE);
                 mListener.onStartOpening();
                 break;
         }
     }
 
-    public void addButton(final View menuButton) {
+    void addButton(final View menuButton) {
         mButtons.add(menuButton);
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,6 +165,9 @@ public class MenuController {
     private void onItemClick(View menuButton) {
         if (mListener != null) {
             mListener.onItemClick(menuButton);
+            if (menuButton != getFirstButton()) {
+                mClickedButton = menuButton;
+            }
         }
     }
 
@@ -136,20 +175,29 @@ public class MenuController {
         return mButtons.size();
     }
 
+    public View getFirstButton() {
+        return mButtons.get(0);
+    }
+
     public void setButtonsVisibility(int visibility) {
-        for (int i=0; i<getButtonsNumber(); i++) {
-            mButtons.get(i).setVisibility(visibility);
+        for (int i=1; i<getButtonsNumber(); i++) {
+            View button = mButtons.get(i);
+            if (mClickedButton == button && mState == STATE_OPENING) {
+                button.setVisibility(View.GONE);
+            } else {
+                button.setVisibility(visibility);
+            }
         }
     }
 
-    public void setButtonsEnable(boolean isEnabled) {
+    void setFirstButtonBackground(Drawable drawable) {
+        getFirstButton().setBackground(drawable);
+    }
+
+    private void setButtonsEnable(boolean isEnabled) {
         for (int i=0; i<getButtonsNumber(); i++) {
             mButtons.get(i).setEnabled(isEnabled);
         }
-    }
-
-    public ButtonPoint getButtonsPoint(View menuButton) {
-        return mButtonPositions.get(menuButton);
     }
 
 }

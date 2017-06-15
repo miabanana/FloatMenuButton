@@ -1,6 +1,7 @@
 package com.huaying.floatmenu;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -53,6 +54,8 @@ public class FloatMenu extends ViewGroup implements MenuController.ControllerLis
         for (int i = 0; i<getChildCount(); i++) {
             mController.addButton(getChildAt(i));
         }
+
+        mController.setButtonsVisibility(GONE);
     }
 
     /**
@@ -62,15 +65,13 @@ public class FloatMenu extends ViewGroup implements MenuController.ControllerLis
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int childCount = getChildCount();
-
         // Measurement will ultimately be computing these values.
         int maxHeight = 0;
         int maxWidth = 0;
 
         // Iterate through all children, measuring them and computing our dimensions
         // from their size.
-        for (int i = 0; i < childCount; i++) {
+        for (int i = 0; i < getChildCount(); i++) {
             final View child = getChildAt(i);
             if (child.getVisibility() == GONE) continue;
 
@@ -96,9 +97,6 @@ public class FloatMenu extends ViewGroup implements MenuController.ControllerLis
      */
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        final int count = getChildCount();
-        Log.d("mia", "children = " + count);
-
         // Get the available size of child view
         final int childLeft = this.getPaddingLeft();
         final int childTop = this.getPaddingTop();
@@ -113,7 +111,7 @@ public class FloatMenu extends ViewGroup implements MenuController.ControllerLis
         curLeft = childLeft;
         curBottom = childBottom;
 
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
             if (child.getVisibility() == GONE) continue;
 
@@ -178,5 +176,9 @@ public class FloatMenu extends ViewGroup implements MenuController.ControllerLis
     public void addButton(View menuButton) {
         addView(menuButton, getChildCount()-1);
         mController.addButton(menuButton);
+    }
+
+    public void setFirstButtonBackground(Drawable drawable) {
+        mController.setFirstButtonBackground(drawable);
     }
 }
