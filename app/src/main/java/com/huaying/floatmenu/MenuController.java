@@ -19,15 +19,48 @@ public class MenuController {
     private static final int ANIMATION_DURATION = 100;
 
     public interface ControllerListener {
-        void onItemClick(FloatMenuButton menuButton);
+        void onItemClick(View menuButton);
         void onStartOpening();
+        void onOpened();
         void onStartClosing();
+        void onClosed();
     }
 
-    private List<FloatMenuButton> mButtons = new ArrayList<>();
-    private Map<FloatMenuButton, ButtonPoint> mButtonPositions = new HashMap<>();
+    private List<View> mButtons = new ArrayList<>();
+    private Map<View, ButtonPoint> mButtonPositions = new HashMap<>();
     private int mState;
     private final ControllerListener mListener;
+
+//-----
+    private List<View> mMenuBtnList;
+    private View mFirstMenuBtn;
+
+//    public FloatMenu(View firstMenuBtn, View... otherMenuBtns) {
+//        mFirstMenuBtn = firstMenuBtn;
+//        Collections.addAll(mMenuBtnList, otherMenuBtns);
+//    }
+
+    public void openMenu() {
+
+    }
+
+    public void closeMenu(View selectedBtn) {
+        if (mFirstMenuBtn != selectedBtn) {
+            mMenuBtnList.add(mFirstMenuBtn);
+            mMenuBtnList.remove(selectedBtn);
+            mFirstMenuBtn = selectedBtn;
+        }
+    }
+
+    public View getFirstMenuBtn() {
+        return mFirstMenuBtn;
+    }
+
+    public List<View> getMenuBtnList() {
+        return mMenuBtnList;
+    }
+//----
+
 
     public MenuController(ControllerListener listener) {
         this.mListener = listener;
@@ -54,6 +87,7 @@ public class MenuController {
         if (!isOpened()) return;
 
         setState(STATE_CLOSING);
+
         setState(STATE_CLOSED);
     }
 
@@ -82,7 +116,7 @@ public class MenuController {
         }
     }
 
-    public void addButton(final FloatMenuButton menuButton) {
+    public void addButton(final View menuButton) {
         mButtons.add(menuButton);
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,7 +126,7 @@ public class MenuController {
         });
     }
 
-    private void onItemClick(FloatMenuButton menuButton) {
+    private void onItemClick(View menuButton) {
         if (mListener != null) {
             mListener.onItemClick(menuButton);
         }
@@ -114,7 +148,7 @@ public class MenuController {
         }
     }
 
-    public ButtonPoint getButtonsPoint(FloatMenuButton menuButton) {
+    public ButtonPoint getButtonsPoint(View menuButton) {
         return mButtonPositions.get(menuButton);
     }
 
