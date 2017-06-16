@@ -7,9 +7,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Created by huaying on 08/06/2017.
  */
@@ -55,6 +52,7 @@ public class FloatMenu extends ViewGroup implements MenuController.ControllerLis
             mController.addButton(getChildAt(i));
         }
 
+        mController.initActivatedButton(getChildAt(1));
         mController.setButtonsVisibility(GONE);
     }
 
@@ -178,7 +176,7 @@ public class FloatMenu extends ViewGroup implements MenuController.ControllerLis
         mController.addButton(menuButton);
     }
 
-    public void setFirstButtonBackground(Drawable drawable) {
-        mController.setFirstButtonBackground(drawable);
+    public void setMenuButtonBackground(Drawable drawable) {
+        mController.setMenuButtonBackground(drawable);
     }
 }

@@ -8,12 +8,9 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
-import android.widget.Button;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by huaying on 08/06/2017.
@@ -38,9 +35,9 @@ class MenuController {
     }
 
     private final ControllerListener mListener;
-    private List<View> mButtons = new ArrayList<>();
+    private final List<View> mButtons = new ArrayList<>();
     private int mState;
-    private View mClickedButton;
+    private View mActivatedButton;
 
     MenuController(ControllerListener listener) {
         this.mListener = listener;
@@ -157,32 +154,32 @@ class MenuController {
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onItemClick(menuButton);
+                if (mListener != null) {
+                    mListener.onItemClick(v);
+                    if (v != getMenuButton()) {
+                        mActivatedButton = v;
+                    }
+                }
             }
         });
     }
 
-    private void onItemClick(View menuButton) {
-        if (mListener != null) {
-            mListener.onItemClick(menuButton);
-            if (menuButton != getFirstButton()) {
-                mClickedButton = menuButton;
-            }
-        }
-    }
-
-    public int getButtonsNumber() {
+    private int getButtonsNumber() {
         return mButtons.size();
     }
 
-    public View getFirstButton() {
+    private View getMenuButton() {
         return mButtons.get(0);
     }
 
-    public void setButtonsVisibility(int visibility) {
+    void initActivatedButton(View menuButton) {
+        mActivatedButton = menuButton;
+    }
+
+    void setButtonsVisibility(int visibility) {
         for (int i=1; i<getButtonsNumber(); i++) {
             View button = mButtons.get(i);
-            if (mClickedButton == button && mState == STATE_OPENING) {
+            if (mActivatedButton == button && mState == STATE_OPENING) {
                 button.setVisibility(View.GONE);
             } else {
                 button.setVisibility(visibility);
@@ -190,8 +187,8 @@ class MenuController {
         }
     }
 
-    void setFirstButtonBackground(Drawable drawable) {
-        getFirstButton().setBackground(drawable);
+    void setMenuButtonBackground(Drawable drawable) {
+        getMenuButton().setBackground(drawable);
     }
 
     private void setButtonsEnable(boolean isEnabled) {

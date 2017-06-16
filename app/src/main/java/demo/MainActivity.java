@@ -30,17 +30,17 @@ public class MainActivity extends AppCompatActivity {
                         string = "menu";
                         break;
                     case R.id.beauty:
-                        floatMenu.setFirstButtonBackground(menuButton.getBackground());
+                        floatMenu.setMenuButtonBackground(menuButton.getBackground());
                         floatMenu.toggle();
                         string = "beauty";
                         break;
                     case R.id.mask:
-                        floatMenu.setFirstButtonBackground(menuButton.getBackground());
+                        floatMenu.setMenuButtonBackground(menuButton.getBackground());
                         floatMenu.toggle();
                         string = "mask";
                         break;
                     case R.id.makeup:
-                        floatMenu.setFirstButtonBackground(menuButton.getBackground());
+                        floatMenu.setMenuButtonBackground(menuButton.getBackground());
                         floatMenu.toggle();
                         string = "makeup";
                         break;
